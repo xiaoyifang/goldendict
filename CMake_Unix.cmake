@@ -44,6 +44,7 @@ pkg_check_modules(PKGCONFIG_DEPS IMPORTED_TARGET
         vorbis # .ogg
         vorbisfile
         liblzma
+        libzstd
         xapian-core
 )
 
