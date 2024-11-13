@@ -24,7 +24,6 @@ class WebSiteDictionary: public Dictionary::Class
 {
   string name;
   QByteArray urlTemplate;
-  bool experimentalIframe;
   QString iconFilename;
   bool inside_iframe;
   QNetworkAccessManager & netMgr;
@@ -41,14 +40,8 @@ public:
     name( name_ ),
     iconFilename( iconFilename_ ),
     inside_iframe( inside_iframe_ ),
-    netMgr( netMgr_ ),
-    experimentalIframe( false )
+    netMgr( netMgr_ )
   {
-    if ( urlTemplate_.startsWith( "http://" ) || urlTemplate_.startsWith( "https://" ) ) {
-      experimentalIframe = true;
-    }
-    //else file:/// local dictionary file path
-
     urlTemplate           = QUrl( urlTemplate_ ).toEncoded();
     dictionaryDescription = urlTemplate_;
   }
@@ -60,7 +53,9 @@ public:
 
   map< Property, string > getProperties() noexcept override
   {
-    return map< Property, string >();
+    map< Property, string > properties;
+    properties.insert( { Property::Url, urlTemplate.toStdString() } );
+    return properties;
   }
 
   unsigned long getArticleCount() noexcept override
@@ -321,7 +316,7 @@ void WebSiteArticleRequest::requestFinished( QNetworkReply * r )
 
 sptr< DataRequest > WebSiteDictionary::getArticle( wstring const & str,
                                                    vector< wstring > const & /*alts*/,
-                                                   wstring const & context,
+                                                   wstring const & /*context*/,
                                                    bool /*ignoreDiacritics*/ )
 {
   QString urlString = Utils::WebSite::urlReplaceWord( QString( urlTemplate ), QString::fromStdU32String( str ) );
@@ -335,24 +330,22 @@ sptr< DataRequest > WebSiteDictionary::getArticle( wstring const & str,
     QUrl url( urlString );
     GlobalBroadcaster::instance()->addWhitelist( url.host() );
 
-    QString encodeUrl;
-    if ( experimentalIframe ) {
-      encodeUrl = "ifr://localhost?url=" + QUrl::toPercentEncoding( urlString );
+    const QString & encodeUrl = urlString;
+
+    if ( GlobalBroadcaster::instance()->getPreference()->openWebsiteInNewTab ) {
+      result += string( "<div><span>this website dictionary is opened in the new tab</span></div>" );
     }
     else {
-      encodeUrl = urlString;
-    }
-
-    fmt::format_to( std::back_inserter( result ),
-                    R"(<iframe id="gdexpandframe-{}" src="{}"
+      fmt::format_to( std::back_inserter( result ),
+                      R"(<iframe id="gdexpandframe-{}" src="{}"
 onmouseover="processIframeMouseOver('gdexpandframe-{}');"
 onmouseout="processIframeMouseOut();" scrolling="no"
 style="overflow:visible; width:100%; display:block; border:none;"
 sandbox="allow-same-origin allow-scripts allow-popups"></iframe>)",
-                    getId(),
-                    encodeUrl.toStdString(),
-                    getId() );
-
+                      getId(),
+                      encodeUrl.toStdString(),
+                      getId() );
+    }
     auto dr = std::make_shared< DataRequestInstant >( true );
     dr->appendString( result );
     return dr;
