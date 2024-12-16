@@ -92,9 +92,6 @@ QList< uint32_t > Reader::search( std::string const & index_word,int flag, uint3
   for ( Xapian::MSetIterator i = matches.begin(); i != matches.end(); ++i ) {
     qDebug() << i.get_rank() + 1 << ": " << i.get_weight() << " docid=" << *i << " ["
              << i.get_document().get_data().c_str() << "]";
-    if ( i.get_document().get_data() == finish_mark ) {
-      continue;
-    }
     offsetsForHeadwords.append( atoi( i.get_document().get_data().c_str() ) );
   }
 
