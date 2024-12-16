@@ -49,13 +49,13 @@ public:
   Reader( std::string const & filePath );
 
   QList< uint32_t > exactSearch( std::string const & index_word, uint32_t maxResults=1 );
-  QList< uint32_t > fuzzySearch( std::string const & index_word, uint32_t maxResults );
-  QList< uint32_t > prefixSearch( std::string const & index_word, uint32_t maxResults );
+  QList< uint32_t > fuzzySearch( std::string const & index_word, uint32_t maxResults=10 );
+  QList< uint32_t > prefixSearch( std::string const & index_word, uint32_t maxResults=10 );
 
-  QList< uint32_t > suffixSearch( std::string const & index_word, uint32_t maxResults );
+  QList< uint32_t > suffixSearch( std::string const & index_word, uint32_t maxResults=10 );
 
 private:
-  QList< uint32_t > search( std::string const & index_word, int flag, uint32_t maxResults = 1 );
+  QList< uint32_t > search( std::string const & index_word, int flag, uint32_t maxResults = 10 );
 };
 
 } // namespace ChunkedStorage

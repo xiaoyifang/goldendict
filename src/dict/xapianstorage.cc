@@ -41,7 +41,6 @@ Reader::Reader( std::string const & filePath ):
 QList< uint32_t > Reader::exactSearch( std::string const & index_word, uint32_t maxResults )
 {
   int flag = Xapian::QueryParser::FLAG_PHRASE;
-
   return search( query_string, flag, maxResults );
 }
 
