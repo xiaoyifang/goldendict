@@ -58,4 +58,4 @@ private:
   QList< uint32_t > search( std::string const & index_word, int flag, uint32_t maxResults = 10 );
 };
 
-} // namespace ChunkedStorage
+} // namespace XapianStorage
