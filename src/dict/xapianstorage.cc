@@ -2,11 +2,7 @@
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
 #include "xapianstorage.hh"
-#include <zlib.h>
 #include <string.h>
-#include <QDataStream>
-#include <QScopeGuard>
-#include <QMutexLocker>
 
 namespace XapianStorage {
 
@@ -26,6 +22,15 @@ void Writer::addWord( std::string const & index_word, uint32_t articleOffset )
   indexer.index_text( index_word );
   doc.set_data( std::to_string( address ) );
   db.add_document( doc );
+
+
+  //used in suffix search
+  std::string reversed_word = std::string(index_word.rbegin(), index_word.rend());
+  Xapian::Document doc;
+  indexer.set_document(doc);
+  indexer.index_text(reversed_word);
+  doc.set_data(std::to_string(articleOffset));
+  db.add_document(doc);
 }
 Reader::Reader( std::string const & filePath ):
   db( filePath )
@@ -40,6 +45,24 @@ QList< uint32_t > Reader::exactSearch( std::string const & index_word, uint32_t 
   return search( query_string, flag, maxResults );
 }
 
+QList<uint32_t> Reader::fuzzySearch(std::string const &index_word, uint32_t maxResults)
+{
+  int flag = Xapian::QueryParser::FLAG_WILDCARD;
+  return search(index_word, flag, maxResults);
+}
+
+QList<uint32_t> Reader::prefixSearch(std::string const &index_word, uint32_t maxResults)
+{
+  int flag = Xapian::QueryParser::FLAG_PARTIAL;
+  return search(index_word, flag, maxResults);
+}
+
+QList<uint32_t> Reader::suffixSearch(std::string const &index_word, uint32_t maxResults)
+{
+  std::string reversed_word = std::string(index_word.rbegin(), index_word.rend());
+  int flag = Xapian::QueryParser::FLAG_PARTIAL;
+  return search(reversed_word, flag, maxResults);
+}
 
 QList< uint32_t > Reader::search( std::string const & index_word,int flag, uint32_t maxResults )
 {
