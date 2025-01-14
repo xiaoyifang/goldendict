@@ -1247,6 +1247,7 @@ public:
 
 private:
   ChunkedStorage::Writer & chunks;
+  XapianStorage::Writer writer;
   IndexedWords & indexedWords;
 };
 
