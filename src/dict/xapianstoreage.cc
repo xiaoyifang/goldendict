@@ -127,4 +127,13 @@ QList< uint32_t > Reader::getDocument( std::string const & searchString )
   }
 }
 
+Reader::~Reader()
+{
+  try {
+    _db.close();
+  }
+  catch ( ... ) {
+  }
+}
+
 } // namespace ChunkedStorage
