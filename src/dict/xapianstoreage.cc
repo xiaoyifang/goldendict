@@ -8,21 +8,18 @@ Writer::Writer( QString & filename ):
   _filename( filename )
 {
   try {
-    std::string dbPath = fileName.toStdString();
-    _db                = Xapian::WritableDatabase( dbPath + "_temp", Xapian::DB_CREATE_OR_OPEN );
-    std::cout << "Database opened successfully at: " << dbPath << std::endl;
+    std::string dbPath = _filename.toStdString();
+    _db = Xapian::WritableDatabase( dbPath + "_temp", Xapian::DB_CREATE_OR_OPEN );
+    qDebug() << "Database opened successfully at:" << QString::fromStdString(dbPath);
   }
   catch ( const Xapian::Error & e ) {
-    std::cerr << "Xapian error: " << e.get_msg() << std::endl;
-    throw;
+    qWarning() << "Xapian error:" << QString::fromStdString(e.get_msg());
   }
   catch ( const std::exception & e ) {
-    std::cerr << "Standard exception: " << e.what() << std::endl;
-    throw;
+    qWarning() << "Standard exception:" << e.what();
   }
   catch ( ... ) {
-    std::cerr << "Unknown exception" << std::endl;
-    throw;
+    qWarning() << "Unknown exception";
   }
 }
 
