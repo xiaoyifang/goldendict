@@ -1230,7 +1230,8 @@ static void addEntryToIndexSingle( QString const & word, uint32_t offset, Indexe
 class ArticleHandler: public MdictParser::RecordHandler
 {
 public:
-  ArticleHandler( ChunkedStorage::Writer & chunks, IndexedWords & indexedWords ):
+  ArticleHandler(XapianStorage::Writer & xWriter, ChunkedStorage::Writer & chunks, IndexedWords & indexedWords ):
+    xWriter( xWriter ),
     chunks( chunks ),
     indexedWords( indexedWords )
   {
@@ -1243,12 +1244,13 @@ public:
     chunks.addToBlock( &recordInfo, sizeof( recordInfo ) );
     // Add entries to the index
     addEntryToIndex( headWord, articleAddress, indexedWords );
+    xWriter.addDocument( headWord, articleAddress );
   }
 
 private:
   ChunkedStorage::Writer & chunks;
-  XapianStorage::Writer writer;
   IndexedWords & indexedWords;
+  XapianStorage::Writer & xWriter
 };
 
 class ResourceHandler: public MdictParser::RecordHandler
@@ -1270,6 +1272,7 @@ public:
 
 private:
   ChunkedStorage::Writer & chunks;
+  XapianStorage::Writer writer;
   IndexedWords & indexedWords;
 };
 
@@ -1380,6 +1383,7 @@ vector< sptr< Dictionary::Class > > makeDictionaries( vector< string > const & f
       // articles' offsets.
       IndexedWords indexedWords;
       ChunkedStorage::Writer chunks( idx );
+      XapianStorage::Writer xWriter( idxFileName+".h.db" );
 
       idxHeader.isRightToLeft = parser.isRightToLeft();
 
@@ -1391,7 +1395,7 @@ vector< sptr< Dictionary::Class > > makeDictionaries( vector< string > const & f
         idxHeader.descriptionSize = description.size() + 1;
       }
 
-      ArticleHandler articleHandler( chunks, indexedWords );
+      ArticleHandler articleHandler( xWriter, chunks, indexedWords );
       MdictParser::HeadWordIndex headWordIndex;
 
       // enumerating word and its definition
