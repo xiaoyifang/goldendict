@@ -63,7 +63,7 @@ Writer::~Writer()
   try {
     if(!_isClosed)
     {
-      db.close();
+      _db.close();
     }
   }
   catch ( ... ) {
