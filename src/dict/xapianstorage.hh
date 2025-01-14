@@ -22,7 +22,7 @@ class Writer
 public:
   explicit Writer( QString & );
 
-  void addDocument(uint32_t , std::string const & );
+  void addDocument(uint32_t , std::string const &,std::string const prefix=""  );
 
   void commit();
 

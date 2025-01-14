@@ -23,19 +23,24 @@ Writer::Writer( QString & filename ):
   }
 }
 
-void Writer::addDocument( uint32_t offset, std::string const & word )
+void Writer::addDocument( uint32_t offset, std::string const & word,std::string const prefix )
 {
   Xapian::TermGenerator indexer;
   //  Xapian::Stem stemmer("english");
   //  indexer.set_stemmer(stemmer);
   //  indexer.set_stemming_strategy(indexer.STEM_SOME_FULL_POS);
-  indexer.set_flags( Xapian::TermGenerator::FLAG_CJK_NGRAM );
 
   Xapian::Document doc;
 
   indexer.set_document( doc );
-
-  indexer.index_text( word );
+  if ( prefix.size() ) {
+    indexer.set_flags( Xapian::TermGenerator::NONE );
+    indexer.index_text( word, 1, prefix );
+  }
+  else {
+    indexer.set_flags( Xapian::TermGenerator::FLAG_CJK_NGRAM );
+    indexer.index_text( word );
+  }
 
   doc.set_data( std::to_string( offset ) );
   // Add the document to the database.
